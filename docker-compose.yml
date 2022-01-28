@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  model-site-api:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    container_name: ModelSite-api
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 7778:8000
+    volumes:
+      - ./django/ModelSite_Project:/ModelSite_Project
+    depends_on:
+      - model-site-db
+
+  model-site-worker:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    container_name: ModelSite-celery
+    command: celery -A ModelSite worker -l info
+    volumes:
+      - ./django/ModelSite_Project:/ModelSite_Project
+    depends_on:
+      - model-site-broker
+      - model-site-api
+
+  model-site-broker:
+    build:
+      context: ./broker
+      dockerfile: Dockerfile
+    container_name: ModelSite-broker
+    ports:
+      - 5699:5672
+
+  model-site-db:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: ModelSite-db
+    expose:
+      - 5432
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+
+volumes:
+  db_volume:

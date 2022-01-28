@@ -1,0 +1,3 @@
+FROM rabbitmq:latest
+ENV RABBITMQ_DEFAULT_USER admin
+ENV RABBITMQ_DEFAULT_PASS *p4ss_3ntelMS
